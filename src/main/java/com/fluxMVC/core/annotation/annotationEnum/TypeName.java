@@ -10,9 +10,14 @@ package com.fluxMVC.core.annotation.annotationEnum;
 public enum TypeName {
     INTEGER("java.lang.integer"),
     STRING("java.lang.string"),
-    LONG("java.lang.long"),
-    BOOLEAN("java.lang.boolean"),
-    FLOAT("java.lang.float");
+    LONGABLE("java.lang.long"),
+    BOOLEANABLE("java.lang.boolean"),
+    FLOATABLE("java.lang.float"),
+
+    INT("int"),
+    LONG("long"),
+    BOOLEAN("boolean"),
+    FLOAT("float");
 
     private String name;
 

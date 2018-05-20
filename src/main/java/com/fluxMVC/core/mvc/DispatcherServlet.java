@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -66,17 +67,22 @@ public class DispatcherServlet extends HttpServlet {
         //获取http 请求动作;获取http 访问路径
         String requestMethod = request.getMethod().toLowerCase();
         String requestPath = request.getPathInfo();
+        //获取一级URI路径
         String basePath = getBasePath(requestPath);
         if (basePath.equals(Exception.PATH_NOT_FOUND.getInfo())) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, Exception.PATH_NOT_FOUND.getInfo());
         }
+        //二级URI路径
         String secondaryPath = requestPath.substring(basePath.length());
+        //获取映射controller list
         List<Class> controllerMapping = ControllerMapping.getControllerMapping(basePath);
+        //获取映射controller方法列表，controller路径映射为空则获取所有controller类方法
         List<Method> methodMapping = getMethodsMapping(controllerMapping);
         Class<?> controllerClass = null;
         Method actionMethod = null;
+        //匹配映射方法，若不存在匹配，controller method置为空
         for (Method method : methodMapping) {
-            //TODO 这个路经验证不要整合进去
+            //二级URI校验，@pathvariable判断
             boolean flag = vaildSecondaryPath(requestMethod, secondaryPath, method);
             if (flag) {
                 controllerClass = method.getDeclaringClass();
@@ -88,7 +94,6 @@ public class DispatcherServlet extends HttpServlet {
             EnvironmentContext context = new EnvironmentContext(controllerClass, actionMethod, getParam(request), secondaryPath);
             Object result = doDispatch(context);
             resultWapper(request, response, result);
-//            doDispatch(request, response, controllerClass, actionMethod, param, secondaryPath);
         } catch (ArgsException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMsg());
         } catch (PathException e) {
@@ -148,6 +153,10 @@ public class DispatcherServlet extends HttpServlet {
         }
         //获取post请求发来的参数
         String body = CodeUtil.decodeURL(StreamUtil.getString(request.getInputStream()));
+        if (body.contains("Content-Disposition: form-data")) {
+            postHandler(paramMap, body);
+            return new Param(paramMap);
+        }
         if (StringUtils.isNotEmpty(body)) {
             String[] splitString = StringUtils.split(body, "&");
             if (!ArrayUtils.isEmpty(splitString)) {
@@ -162,6 +171,16 @@ public class DispatcherServlet extends HttpServlet {
             }
         }
         return new Param(paramMap);
+    }
+
+    private void postHandler(Map<String, Object> paramMap, String body) {
+        String[] split = body.split(";");
+        for (int i = 1; i < split.length; i++) {
+            String var = split[i];
+            String name = var.substring(7, var.indexOf("\"", var.indexOf("\"") + 1));
+            String value = var.substring(8 + name.length(), var.indexOf("----------------------------"));
+            paramMap.put(name, value);
+        }
     }
 
 
@@ -216,9 +235,5 @@ public class DispatcherServlet extends HttpServlet {
             }
         }
         return value.equals(vaildPath) && httpMethod.equals(requestMethod);
-    }
-
-    public static void main(String[] args) {
-        System.out.println(11);
     }
 }

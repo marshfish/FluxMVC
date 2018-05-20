@@ -163,15 +163,15 @@ public class EnvironmentContext {
             map.put(paramName, customType);
             return;
         }
-        if (type.toLowerCase().equals(TypeName.INTEGER.getName())) {
+        if (type.toLowerCase().equals(TypeName.INTEGER.getName()) || type.toLowerCase().equals(TypeName.INT.getName())) {
             map.put(paramName, Integer.valueOf(oldVar));
         } else if (type.toLowerCase().equals(TypeName.STRING.getName())) {
             map.put(paramName, oldVar);
-        } else if (type.toLowerCase().equals(TypeName.LONG.getName())) {
+        } else if (type.toLowerCase().equals(TypeName.LONGABLE.getName()) || type.toLowerCase().equals(TypeName.LONG.getName())) {
             map.put(paramName, Long.valueOf(oldVar));
-        } else if (type.toLowerCase().equals(TypeName.BOOLEAN.getName())) {
+        } else if (type.toLowerCase().equals(TypeName.BOOLEANABLE.getName()) || type.toLowerCase().equals(TypeName.BOOLEAN.getName())) {
             map.put(paramName, Boolean.valueOf(oldVar));
-        } else if (type.toLowerCase().equals(TypeName.FLOAT.getName())) {
+        } else if (type.toLowerCase().equals(TypeName.FLOATABLE.getName()) || type.toLowerCase().equals(TypeName.FLOAT.getName())) {
             map.put(paramName, Float.valueOf(oldVar));
         } else {
             map.put(paramName, oldVar);
