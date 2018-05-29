@@ -7,7 +7,7 @@ package com.fluxMVC.core.annotation.exception;
  * @author Kaibo
  * @date 2018/4/19
  */
-public class ArgsException extends RuntimeException {
+public class ArgsException extends BusinessException {
     private String msg;
     private final static int FILE = 0;
 

@@ -8,6 +8,7 @@ import com.fluxMVC.core.util.ClassUtil;
 import com.fluxMVC.core.annotation.beanComponent.Repository;
 import com.fluxMVC.core.annotation.beanComponent.Service;
 import com.fluxMVC.core.initialize.Config;
+import com.fluxMVC.core.util.ReflectionUtil;
 
 
 import java.lang.annotation.Annotation;
@@ -18,7 +19,6 @@ import java.util.Set;
  * Title:    FluxMVC
  * Description:
  *
- *
  * @author kaibo
  * @version 1.0
  * @Ddate 2018/1/6
@@ -27,12 +27,8 @@ public final class ClassesHandler {
     /**
      * 定义类集合(用于存放所加载的类)
      */
-    private static final Set<Class<?>> CLASS_SET;
+    private static Set<Class<?>> CLASS_SET;
 
-    static {
-        String basePackage = Config.getAppBasePackage();
-        CLASS_SET = ClassUtil.getClassSet(basePackage);
-    }
 
     /**
      * 获取应用包名下的所有类
@@ -147,4 +143,10 @@ public final class ClassesHandler {
     }
 
 
+    public void init() {
+        String basePackage = Config.getAppBasePackage();
+        CLASS_SET = ClassUtil.getClassSet(basePackage);
+        MvcBeanHandler handler = (MvcBeanHandler) ReflectionUtil.newInstance(MvcBeanHandler.class);
+        handler.init();
+    }
 }

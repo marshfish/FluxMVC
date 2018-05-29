@@ -11,6 +11,7 @@ import com.fluxMVC.core.initialize.ControllerMapping;
 import com.fluxMVC.core.mvc.bean.DataAndView;
 import com.fluxMVC.core.mvc.bean.EnvironmentContext;
 import com.fluxMVC.core.mvc.bean.Param;
+import com.fluxMVC.core.mvc.bean.ParamProcessor;
 import com.fluxMVC.core.util.CodeUtil;
 import com.fluxMVC.core.util.StreamUtil;
 import org.apache.commons.lang3.ArrayUtils;
@@ -27,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -59,9 +59,8 @@ public class DispatcherServlet extends HttpServlet {
         defaultServlet.addMapping(Config.getAppStaticPath() + "*");
     }
 
-    //TODO 设计模式重构
+    //TODO 统一异常处理
     //TODO 增加自定义注入IOC  BEAN
-    //TODO bootstrap替代静态块
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //获取http 请求动作;获取http 访问路径
@@ -69,17 +68,20 @@ public class DispatcherServlet extends HttpServlet {
         String requestPath = request.getPathInfo();
         //获取一级URI路径
         String basePath = getBasePath(requestPath);
-        if (basePath.equals(Exception.PATH_NOT_FOUND.getInfo())) {
+        if (basePath == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, Exception.PATH_NOT_FOUND.getInfo());
         }
         //二级URI路径
         String secondaryPath = requestPath.substring(basePath.length());
         //获取映射controller list
-        List<Class> controllerMapping = ControllerMapping.getControllerMapping(basePath);
-        //获取映射controller方法列表，controller路径映射为空则获取所有controller类方法
-        List<Method> methodMapping = getMethodsMapping(controllerMapping);
+        List<Method> methodMapping = null;
         Class<?> controllerClass = null;
         Method actionMethod = null;
+        try {
+            methodMapping = controllerAdapter(basePath);
+        } catch (PathException e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMsg());
+        }
         //匹配映射方法，若不存在匹配，controller method置为空
         for (Method method : methodMapping) {
             //二级URI校验，@pathvariable判断
@@ -91,9 +93,8 @@ public class DispatcherServlet extends HttpServlet {
             }
         }
         try {
-            EnvironmentContext context = new EnvironmentContext(controllerClass, actionMethod, getParam(request), secondaryPath);
-            Object result = doDispatch(context);
-            resultWapper(request, response, result);
+            Object result = this.doDispatch(controllerClass, actionMethod, getParam(request), secondaryPath);
+            this.viewResolve(request, response, result);
         } catch (ArgsException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMsg());
         } catch (PathException e) {
@@ -101,10 +102,15 @@ public class DispatcherServlet extends HttpServlet {
         }
     }
 
+    private List<Method> controllerAdapter(String basePath) throws PathException {
+        List<Class> controllerMapping = ControllerMapping.getControllerMapping(basePath);
+        return getMethodsMapping(controllerMapping);
+    }
+
     private String getBasePath(String requestPath) {
         Set<String> mappingSet = ControllerMapping.getControllerMapping();
         Iterator<String> iterator = mappingSet.iterator();
-        String basePath = Exception.PATH_NOT_FOUND.getInfo();
+        String basePath = null;
         while (iterator.hasNext()) {
             String next;
             if (requestPath.startsWith((next = iterator.next()))) {
@@ -115,11 +121,14 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     private List<Method> getMethodsMapping(List<Class> controllerMapping) {
-        List<Method> methodMapping = Collections.emptyList();
+        if (controllerMapping == null || controllerMapping.size() == 0) {
+            throw new PathException(Exception.MAPPING_NOT_FOUND.getInfo());
+        }
+        List<Method> methodMapping = null;
         //拥有controller mapping
         if (controllerMapping.size() == 1) {
             methodMapping = ControllerMapping.getMethodMapping(controllerMapping.get(0));
-        } else if (controllerMapping.size() > 1) {
+        } else {
             //未设置controller mapping
             for (Class cls : controllerMapping) {
                 List<Method> singleMethodMapping = ControllerMapping.getMethodMapping(cls);
@@ -129,16 +138,14 @@ public class DispatcherServlet extends HttpServlet {
         return methodMapping;
     }
 
-    private Object doDispatch(EnvironmentContext context) throws IOException {
-        if (!context.isInitialize()) {
+    private Object doDispatch(Class<?> controllerClass, Method actionMethod, Param param, String secondaryPath) throws IOException {
+        if (controllerClass == null || actionMethod == null) {
             throw new PathException(Exception.PATH_NOT_FOUND.getInfo());
         }
-        if (!ArrayUtils.isEmpty(context.getParameters())) {
-            context.executeService(context.MatchParam().toArray());
-        } else {
-            context.executeService();
-        }
-        return context.serializeResultByResponseBody();
+        EnvironmentContext context = new ParamProcessor(controllerClass, actionMethod, param, secondaryPath);
+        context.paramProcess();
+        context.invokeProcess();
+        return context.resultProcess();
     }
 
 
@@ -184,7 +191,7 @@ public class DispatcherServlet extends HttpServlet {
     }
 
 
-    public void resultWapper(HttpServletRequest request, HttpServletResponse response, Object result) throws IOException, ServletException {
+    public void viewResolve(HttpServletRequest request, HttpServletResponse response, Object result) throws IOException, ServletException {
         if (result instanceof DataAndView) {
             //返回ModelAndView
             DataAndView dataAndView = (DataAndView) result;

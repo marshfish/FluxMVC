@@ -27,22 +27,7 @@ public final class AopInitialize {
 
     private static final Logger logger = LoggerFactory.getLogger(AopInitialize.class);
 
-    static {
-        try {
-            Map<Class<?>, Set<Class<?>>> proxyMap = createProxyMap();
-            Map<Class<?>, List<Proxy>> targetMap = createTargetMap(proxyMap);
-            for (Map.Entry<Class<?>, List<Proxy>> targetEntry : targetMap.entrySet()) {
-                Class<?> targetClass = targetEntry.getKey();
-                List<Proxy> proxyList = targetEntry.getValue();
-                Object proxy = ProxyManager.createProxy(targetClass, proxyList);
-                //覆盖被代理的原始类
-                MvcBeanHandler.setBean(targetClass, proxy);
-            }
-        } catch (Exception e) {
-            logger.error("aop help fail", e);
-            e.printStackTrace();
-        }
-    }
+
 
     /**
      * 获取Aspect的Class Set
@@ -83,7 +68,7 @@ public final class AopInitialize {
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
-    private static Map<Class<?>, List<Proxy>> createTargetMap(Map<Class<?>, Set<Class<?>>> proxyMap) throws IllegalAccessException, InstantiationException {
+    private static Map<Class<?>, List<Proxy>> createAspectMap(Map<Class<?>, Set<Class<?>>> proxyMap) throws IllegalAccessException, InstantiationException {
         Map<Class<?>, List<Proxy>> targetMap = new HashMap<>();
         for (Map.Entry<Class<?>, Set<Class<?>>> proxyEntry : proxyMap.entrySet()) {
             Class<?> proxyClass = proxyEntry.getKey();
@@ -134,4 +119,20 @@ public final class AopInitialize {
     }
 
 
+    public void init() {
+        try {
+            Map<Class<?>, Set<Class<?>>> proxyMap = createProxyMap();
+            Map<Class<?>, List<Proxy>> targetMap = createAspectMap(proxyMap);
+            for (Map.Entry<Class<?>, List<Proxy>> targetEntry : targetMap.entrySet()) {
+                Class<?> targetClass = targetEntry.getKey();
+                List<Proxy> proxyList = targetEntry.getValue();
+                Proxy proxy = ProxyManager.createProxy(targetClass, proxyList);
+                //覆盖被代理的原始类
+                MvcBeanHandler.setBean(targetClass, proxy);
+            }
+        } catch (Exception e) {
+            logger.error("aop help fail", e);
+            e.printStackTrace();
+        }
+    }
 }

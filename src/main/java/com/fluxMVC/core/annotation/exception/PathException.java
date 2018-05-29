@@ -7,7 +7,7 @@ package com.fluxMVC.core.annotation.exception;
  * @author Kaibo
  * @date 2018/4/20
  */
-public class PathException extends RuntimeException {
+public class PathException extends BusinessException {
     private String msg;
     private final static int FILE = 0;
 

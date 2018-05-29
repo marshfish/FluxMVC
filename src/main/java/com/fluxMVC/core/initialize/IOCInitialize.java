@@ -18,10 +18,8 @@ import java.util.Map;
  * @Ddate 2018/1/6
  */
 public final class IOCInitialize {
-    static {
-        /**
-         * 依赖关系注入
-         */
+
+    public void init() {
         Map<Class<?>, Object> beanMap = MvcBeanHandler.getBeanMap();
         if (MapUtils.isNotEmpty(beanMap)) {
             for (Map.Entry<Class<?>, Object> entry : beanMap.entrySet()) {
@@ -43,5 +41,7 @@ public final class IOCInitialize {
                 }
             }
         }
+        ControllerMapping handler = (ControllerMapping) ReflectionUtil.newInstance(ControllerMapping.class);
+        handler.init();
     }
 }

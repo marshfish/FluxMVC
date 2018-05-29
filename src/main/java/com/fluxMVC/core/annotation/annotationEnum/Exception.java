@@ -9,6 +9,7 @@ package com.fluxMVC.core.annotation.annotationEnum;
  */
 public enum Exception {
     PATH_NOT_FOUND("#resource not Found"),
+    MAPPING_NOT_FOUND("can not found mapping by this path"),
     ARGS_EMPTY("argument is null :"),
     EXPRESSION_EMPTY("@pathvariable expression is not exist"),
     EXPRESSION_ERROR("path error in @pathvariable，please check  param expression is exist");

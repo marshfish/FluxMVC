@@ -15,7 +15,7 @@ import java.util.List;
  * @version 1.0
  * @Ddate 2018/1/7
  */
-public class ProxyChain {
+public class ProxyChain<T> {
     private final Class<?> targetClass;
     private final Object targetObject;
     private final Method targetMethod;
@@ -31,13 +31,13 @@ public class ProxyChain {
      */
     private int proxyIndex = 0;
 
-    public ProxyChain(Class<?> targetClass, Object targetObject, Method targetMethod, MethodProxy methodProxy, Object[] methidParams, List<Proxy> proxyList) {
+    public ProxyChain(Class<?> targetClass, Object targetObject, Method targetMethod, MethodProxy methodProxy, Object[] methidParams, List<T> proxyList) {
         this.targetClass = targetClass;
         this.targetObject = targetObject;
         this.targetMethod = targetMethod;
         this.methodProxy = methodProxy;
         this.methodParams = methidParams;
-        this.proxyList = proxyList;
+        this.proxyList = (List<Proxy>) proxyList;
     }
 
     public Class<?> getTargetClass() { return targetClass;}

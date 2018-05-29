@@ -1,5 +1,6 @@
 package com.fluxMVC.core.mvc.handler;
 
+import com.fluxMVC.core.initialize.IOCInitialize;
 import com.fluxMVC.core.mvc.dataHandler.GsonMessgeConventer;
 import com.fluxMVC.core.util.ReflectionUtil;
 
@@ -23,15 +24,6 @@ public final class MvcBeanHandler {
      * MVC bean容器
      */
     private static final Map<Class<?>, Object> BEAN_MAP = new HashMap<>();
-
-    static {
-        Set<Class<?>> beanClassSet = ClassesHandler.getBeanClassSet();
-        addInnerBeanWithoutStatus(beanClassSet);
-        for (Class<?> cls : beanClassSet) {
-            BEAN_MAP.put(cls, ReflectionUtil.newInstance(cls));
-        }
-
-    }
 
     private static void addInnerBeanWithoutStatus(Set<Class<?>> set) {
         set.add(GsonMessgeConventer.class);
@@ -80,4 +72,13 @@ public final class MvcBeanHandler {
     }
 
 
+    public void init() {
+        Set<Class<?>> beanClassSet = ClassesHandler.getBeanClassSet();
+        addInnerBeanWithoutStatus(beanClassSet);
+        for (Class<?> cls : beanClassSet) {
+            BEAN_MAP.put(cls, ReflectionUtil.newInstance(cls));
+        }
+        IOCInitialize handler= (IOCInitialize) ReflectionUtil.newInstance(IOCInitialize.class);
+        handler.init();
+    }
 }
