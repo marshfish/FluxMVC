@@ -126,7 +126,7 @@ public final class AopInitialize {
             for (Map.Entry<Class<?>, List<Proxy>> targetEntry : targetMap.entrySet()) {
                 Class<?> targetClass = targetEntry.getKey();
                 List<Proxy> proxyList = targetEntry.getValue();
-                Proxy proxy = ProxyManager.createProxy(targetClass, proxyList);
+                Object proxy = ProxyManager.createProxy(targetClass, proxyList);
                 //覆盖被代理的原始类
                 MvcBeanHandler.setBean(targetClass, proxy);
             }

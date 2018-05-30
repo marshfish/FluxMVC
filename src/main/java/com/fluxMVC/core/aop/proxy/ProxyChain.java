@@ -10,12 +10,11 @@ import java.util.List;
  * Title:    FluxMVC
  * Description:
  *
- *
  * @author kaibo
  * @version 1.0
  * @Ddate 2018/1/7
  */
-public class ProxyChain<T> {
+public class ProxyChain {
     private final Class<?> targetClass;
     private final Object targetObject;
     private final Method targetMethod;
@@ -31,16 +30,18 @@ public class ProxyChain<T> {
      */
     private int proxyIndex = 0;
 
-    public ProxyChain(Class<?> targetClass, Object targetObject, Method targetMethod, MethodProxy methodProxy, Object[] methidParams, List<T> proxyList) {
+    public ProxyChain(Class<?> targetClass, Object targetObject, Method targetMethod, MethodProxy methodProxy, Object[] methidParams, List<Proxy> proxyList) {
         this.targetClass = targetClass;
         this.targetObject = targetObject;
         this.targetMethod = targetMethod;
         this.methodProxy = methodProxy;
         this.methodParams = methidParams;
-        this.proxyList = (List<Proxy>) proxyList;
+        this.proxyList = proxyList;
     }
 
-    public Class<?> getTargetClass() { return targetClass;}
+    public Class<?> getTargetClass() {
+        return targetClass;
+    }
 
     public Method getTargetMethod() {
         return targetMethod;
@@ -53,16 +54,17 @@ public class ProxyChain<T> {
     /**
      * 判断代理链执行次序
      * list元素依次执行
+     *
      * @return
      * @throws Throwable
      */
     public Object doProxyChain() throws Throwable {
         Object methodResult;
         if (proxyIndex < proxyList.size()) {
-            methodResult=proxyList.get(proxyIndex++).doProxy(this);
-        }else{
+            methodResult = proxyList.get(proxyIndex++).doProxy(this);
+        } else {
             //最后执行被代理方法
-            methodResult=methodProxy.invokeSuper(targetObject,methodParams);
+            methodResult = methodProxy.invokeSuper(targetObject, methodParams);
         }
         return methodResult;
     }

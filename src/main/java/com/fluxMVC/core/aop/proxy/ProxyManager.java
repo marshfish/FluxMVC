@@ -20,12 +20,7 @@ public class ProxyManager {
      * 代理管理器
      */
     @SuppressWarnings("unchecked")
-    public static <T> T createProxy(final Class<?> targetClass, final List<T> proxyList) {
-        return (T) Enhancer.create(targetClass, new MethodInterceptor() {
-            @Override
-            public Object intercept(Object targetObject, Method targetMethod, Object[] targetParams, MethodProxy methodProxy) throws Throwable {
-                return new ProxyChain<>(targetClass, targetObject, targetMethod, methodProxy, targetParams, proxyList).doProxyChain();
-            }
-        });
+    public static <T> T createProxy(final Class<?> targetClass, final List<Proxy> proxyList) {
+        return (T) Enhancer.create(targetClass, (MethodInterceptor) (targetObject, targetMethod, targetParams, methodProxy) -> new ProxyChain(targetClass, targetObject, targetMethod, methodProxy, targetParams, proxyList).doProxyChain());
     }
 }
