@@ -10,7 +10,6 @@ import java.lang.reflect.Method;
  * Title:    FluxMVC
  * Description:
  *
- *
  * @author kaibo
  * @version 1.0
  * @Ddate 2018/1/6
@@ -21,8 +20,8 @@ public final class ReflectionUtil {
     /**
      * 创建实例
      */
-    public static Object newInstance(Class<?> cls) {
-        Object obj = null;
+    public static <T> T newInstance(Class<T> cls) {
+        T obj = null;
         try {
             obj = cls.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
@@ -44,13 +43,14 @@ public final class ReflectionUtil {
         }
         return result;
     }
+
     /**
      * 设置成员变量的值
      */
-    public static void setField(Object obj,Field field,Object value){
+    public static void setField(Object obj, Field field, Object value) {
         field.setAccessible(true);
         try {
-            field.set(obj,value);
+            field.set(obj, value);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }

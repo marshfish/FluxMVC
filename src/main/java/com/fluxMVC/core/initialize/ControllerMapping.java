@@ -2,17 +2,17 @@ package com.fluxMVC.core.initialize;
 
 import com.fluxMVC.core.annotation.beanComponent.Controller;
 import com.fluxMVC.core.annotation.dataHandler.RequestMapping;
+import com.fluxMVC.core.annotation.exception.PathException;
 import com.fluxMVC.core.mvc.handler.ClassesHandler;
 import com.fluxMVC.core.util.JavaassistUtil;
 import com.fluxMVC.core.util.ReflectionUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +43,7 @@ public final class ControllerMapping {
         return CONTROLLER_MAP.keySet();
     }
 
-    public void init() {
+    public void init() throws InvocationTargetException, IllegalAccessException {
         Set<Class<?>> classSet = ClassesHandler.getControllerClassSet();
         if (CollectionUtils.isNotEmpty(classSet)) {
             for (Class<?> cls : classSet) {
@@ -55,7 +55,7 @@ public final class ControllerMapping {
                         List<Class> classList = CONTROLLER_MAP.get(requestPathA);
                         classList.add(cls);
                     } else {
-                        throw new RuntimeException("controller mapping path conflict");
+                        throw new PathException("controller mapping path conflict");
                     }
                 } else {
                     List<Class> classList = new ArrayList<>(classSet.size());
@@ -65,21 +65,18 @@ public final class ControllerMapping {
                 Method[] methods = cls.getDeclaredMethods();
                 if (!ArrayUtils.isEmpty(methods)) {
                     List<Method> methodList = new ArrayList<>();
-                    Map<String, String[]> mappingCache = new LinkedHashMap<>();
+                    Map<String, String[]> mappingCache = new HashMap<>();
                     for (Method method : methods) {
                         if (method.isAnnotationPresent(RequestMapping.class)) {
                             methodList.add(method);
                             mappingCache.put(method.getName(), JavaassistUtil.getParameterNames(cls, method.getName()));
-
                         }
-
                     }
                     METHOD_MAP.put(cls, methodList);
                     PARAMTETER_CACHE.put(cls, mappingCache);
                 }
             }
         }
-        AopInitialize handler = (AopInitialize) ReflectionUtil.newInstance(AopInitialize.class);
-        handler.init();
+        ReflectionUtil.newInstance(AopInitialize.class).init();
     }
 }

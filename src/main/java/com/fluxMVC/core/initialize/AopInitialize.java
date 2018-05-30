@@ -5,12 +5,15 @@ import com.fluxMVC.core.aop.proxy.AspectProxy;
 import com.fluxMVC.core.aop.proxy.Proxy;
 import com.fluxMVC.core.aop.transaction.Transaction;
 import com.fluxMVC.core.mvc.handler.ClassesHandler;
-import com.fluxMVC.core.mvc.handler.MvcBeanHandler;
+import com.fluxMVC.core.mvc.handler.BeanContainer;
 import com.fluxMVC.core.aop.proxy.ProxyManager;
+import com.fluxMVC.core.mvc.handler.CustomBeanHandler;
+import com.fluxMVC.core.util.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -119,7 +122,7 @@ public final class AopInitialize {
     }
 
 
-    public void init() {
+    public void init() throws InvocationTargetException, IllegalAccessException {
         try {
             Map<Class<?>, Set<Class<?>>> proxyMap = createProxyMap();
             Map<Class<?>, List<Proxy>> targetMap = createAspectMap(proxyMap);
@@ -128,11 +131,13 @@ public final class AopInitialize {
                 List<Proxy> proxyList = targetEntry.getValue();
                 Object proxy = ProxyManager.createProxy(targetClass, proxyList);
                 //覆盖被代理的原始类
-                MvcBeanHandler.setBean(targetClass, proxy);
+                BeanContainer.setBean(targetClass, proxy);
             }
+            logger.info("bean container has been finished init");
         } catch (Exception e) {
             logger.error("aop help fail", e);
             e.printStackTrace();
         }
+        ReflectionUtil.newInstance(CustomBeanHandler.class).init();
     }
 }

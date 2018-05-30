@@ -9,7 +9,7 @@ import com.fluxMVC.core.annotation.dataHandler.RequestMapping;
 import com.fluxMVC.core.annotation.dataHandler.RequestParam;
 import com.fluxMVC.core.annotation.exception.ArgsException;
 import com.fluxMVC.core.mvc.dataHandler.GsonMessgeConventer;
-import com.fluxMVC.core.mvc.handler.MvcBeanHandler;
+import com.fluxMVC.core.mvc.handler.BeanContainer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
@@ -146,7 +146,7 @@ public class ParamProcessor extends EnvironmentContext {
             Class<?> type = parameter.getType();
             if (map.containsKey(paramName)) {
                 String data = (String) map.get(paramName);
-                obj = MvcBeanHandler.getBean(GsonMessgeConventer.class).read(data, null, type);
+                obj = BeanContainer.getBean(GsonMessgeConventer.class).read(data, null, type);
                 if (obj != null) {
                     map.put(paramName, obj);
                 }

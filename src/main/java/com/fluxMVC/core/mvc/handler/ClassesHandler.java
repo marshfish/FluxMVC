@@ -12,6 +12,7 @@ import com.fluxMVC.core.util.ReflectionUtil;
 
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -99,6 +100,7 @@ public final class ClassesHandler {
                 classSet.add(cls);
             }
         }
+        System.out.println("=====================configuration"+classSet.size());
         return classSet;
     }
 
@@ -143,10 +145,10 @@ public final class ClassesHandler {
     }
 
 
-    public void init() {
-        String basePackage = Config.getAppBasePackage();
-        CLASS_SET = ClassUtil.getClassSet(basePackage);
-        MvcBeanHandler handler = (MvcBeanHandler) ReflectionUtil.newInstance(MvcBeanHandler.class);
-        handler.init();
+    public void init() throws InvocationTargetException, IllegalAccessException {
+        CLASS_SET = ClassUtil.getClassSet(Config.getAppBasePackage());
+        ReflectionUtil.newInstance(BeanContainer.class).init();
+
+
     }
 }

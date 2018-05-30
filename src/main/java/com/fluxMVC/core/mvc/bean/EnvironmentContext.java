@@ -4,7 +4,7 @@ import com.fluxMVC.core.annotation.annotationEnum.ResultData;
 import com.fluxMVC.core.annotation.dataHandler.ResponseBody;
 import com.fluxMVC.core.initialize.ControllerMapping;
 import com.fluxMVC.core.mvc.dataHandler.GsonMessgeConventer;
-import com.fluxMVC.core.mvc.handler.MvcBeanHandler;
+import com.fluxMVC.core.mvc.handler.BeanContainer;
 import com.fluxMVC.core.util.JavaassistUtil;
 import com.fluxMVC.core.util.ReflectionUtil;
 import org.apache.commons.lang3.ArrayUtils;
@@ -78,7 +78,7 @@ public abstract class EnvironmentContext {
             ResponseBody annotation = actionMethod.getAnnotation(ResponseBody.class);
             ResultData rule = annotation.rule();
             if (rule == ResultData.JSON) {
-                serialized = MvcBeanHandler.getBean(GsonMessgeConventer.class).write(result);
+                serialized = BeanContainer.getBean(GsonMessgeConventer.class).write(result);
             } else if (rule == ResultData.XML) {
                 //TODO XML序列化
             }
@@ -97,7 +97,7 @@ public abstract class EnvironmentContext {
     }
 
     private void invoke(Object... obj) {
-        Object controllerBean = MvcBeanHandler.getBean(controllerClass);
+        Object controllerBean = BeanContainer.getBean(controllerClass);
         this.result = ReflectionUtil.invockMethod(controllerBean, actionMethod, obj);
     }
 }

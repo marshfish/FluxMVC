@@ -5,6 +5,7 @@ import com.fluxMVC.core.annotation.annotationEnum.Exception;
 import com.fluxMVC.core.annotation.dataHandler.RequestMapping;
 import com.fluxMVC.core.annotation.exception.ArgsException;
 import com.fluxMVC.core.annotation.exception.PathException;
+import com.fluxMVC.core.annotation.exception.ServerInnerException;
 import com.fluxMVC.core.initialize.BeanInitialize;
 import com.fluxMVC.core.initialize.Config;
 import com.fluxMVC.core.initialize.ControllerMapping;
@@ -16,6 +17,8 @@ import com.fluxMVC.core.util.CodeUtil;
 import com.fluxMVC.core.util.StreamUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -27,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -46,10 +50,16 @@ import java.util.Set;
  */
 @WebServlet(urlPatterns = "/*", loadOnStartup = 0)
 public class DispatcherServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(DispatcherServlet.class);
+
     @Override
     public void init(ServletConfig config) throws ServletException {
         //初始化bean factory
-        BeanInitialize.init();
+        try {
+            BeanInitialize.init();
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            logger.error(e.getMessage(), e);
+        }
         ServletContext servletContext = config.getServletContext();
         //注册处理jsp的servlet
         ServletRegistration jspServlet = servletContext.getServletRegistration("jsp");

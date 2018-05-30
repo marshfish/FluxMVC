@@ -1,11 +1,13 @@
 package com.fluxMVC.core.initialize;
 
 import com.fluxMVC.core.annotation.dataHandler.Inject;
-import com.fluxMVC.core.mvc.handler.MvcBeanHandler;
+import com.fluxMVC.core.annotation.exception.ServerInnerException;
+import com.fluxMVC.core.mvc.handler.BeanContainer;
 import com.fluxMVC.core.util.ReflectionUtil;
 import org.apache.commons.collections4.MapUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 /**
@@ -19,8 +21,8 @@ import java.util.Map;
  */
 public final class IOCInitialize {
 
-    public void init() {
-        Map<Class<?>, Object> beanMap = MvcBeanHandler.getBeanMap();
+    public void init() throws InvocationTargetException, IllegalAccessException {
+        Map<Class<?>, Object> beanMap = BeanContainer.getBeanMap();
         if (MapUtils.isNotEmpty(beanMap)) {
             for (Map.Entry<Class<?>, Object> entry : beanMap.entrySet()) {
                 Class<?> key = entry.getKey();
@@ -31,17 +33,15 @@ public final class IOCInitialize {
                     if (field.isAnnotationPresent(Inject.class)) {
                         Class<?> type = field.getType();
                         //注意要保证加载顺序
-                        Object fieldInstanceObject = beanMap.get(type);
-                        if (null != fieldInstanceObject) {
-                            ReflectionUtil.setField(value, field, fieldInstanceObject);
+                        Object injectBean = beanMap.get(type);
+                        if (null != injectBean) {
+                            ReflectionUtil.setField(value, field, injectBean);
                         } else {
-                            throw new RuntimeException("handler{" + type.getName() + "} has not been initializing");
+                            throw new ServerInnerException("handler{" + type.getName() + "} has not been initializing");
                         }
                     }
                 }
             }
         }
-        ControllerMapping handler = (ControllerMapping) ReflectionUtil.newInstance(ControllerMapping.class);
-        handler.init();
     }
 }

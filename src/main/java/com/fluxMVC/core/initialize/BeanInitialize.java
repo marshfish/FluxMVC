@@ -3,6 +3,8 @@ package com.fluxMVC.core.initialize;
 import com.fluxMVC.core.mvc.handler.ClassesHandler;
 import com.fluxMVC.core.util.ReflectionUtil;
 
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * Title:    FluxMVC
  * Description:
@@ -14,13 +16,13 @@ import com.fluxMVC.core.util.ReflectionUtil;
 public final class BeanInitialize {
     /**
      * 初始化
+     * ClassesHandler -> BeanContainer -> ControllerMapping -> AopInitialize -> CustomBeanHandler -> IOCInitialize
      */
     private static boolean isInitialized;
 
-    public static void init() {
+    public static void init() throws InvocationTargetException, IllegalAccessException {
         if (!isInitialized) {
-            ClassesHandler handler = (ClassesHandler) ReflectionUtil.newInstance(ClassesHandler.class);
-            handler.init();
+            ReflectionUtil.newInstance(ClassesHandler.class).init();
             isInitialized = true;
         }
     }

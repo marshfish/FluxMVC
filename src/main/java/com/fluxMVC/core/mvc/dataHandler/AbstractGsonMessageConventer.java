@@ -1,6 +1,6 @@
 package com.fluxMVC.core.mvc.dataHandler;
 
-import com.fluxMVC.core.mvc.handler.MvcBeanHandler;
+import com.fluxMVC.core.mvc.handler.BeanContainer;
 import com.google.gson.Gson;
 
 import java.lang.reflect.Method;
@@ -16,7 +16,7 @@ import java.lang.reflect.Parameter;
 public abstract class AbstractGsonMessageConventer implements MessageConventer {
 
     protected Gson getGson() {
-        Gson bean = MvcBeanHandler.getBean(Gson.class);
+        Gson bean = BeanContainer.getBean(Gson.class);
         return bean == null ? new Gson() : bean;
     }
     public static void main(String[] args) {
