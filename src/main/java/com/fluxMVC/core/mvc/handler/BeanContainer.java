@@ -1,8 +1,6 @@
 package com.fluxMVC.core.mvc.handler;
 
 import com.fluxMVC.core.annotation.exception.ServerInnerException;
-import com.fluxMVC.core.initialize.ControllerMapping;
-import com.fluxMVC.core.initialize.IOCInitialize;
 import com.fluxMVC.core.mvc.dataHandler.GsonMessgeConventer;
 import com.fluxMVC.core.util.ReflectionUtil;
 
@@ -17,7 +15,6 @@ import java.util.Set;
  * Title:    FluxMVC
  * Description:
  *
- *
  * @author kaibo
  * @version 1.0
  * @Ddate 2018/1/6
@@ -28,7 +25,7 @@ public final class BeanContainer {
      */
     private static final Map<Class<?>, Object> BEAN_MAP = new HashMap<>();
 
-    private static void addInnerBeanWithoutStatus(Set<Class<?>> set) {
+    private void innerBeanLoader(Set<Class<?>> set) {
         set.add(GsonMessgeConventer.class);
     }
 
@@ -58,6 +55,7 @@ public final class BeanContainer {
 
     /**
      * 获取bean定义
+     *
      * @param simpleName 非全限定名
      * @return List<String>
      */
@@ -76,11 +74,12 @@ public final class BeanContainer {
 
 
     public void init() throws InvocationTargetException, IllegalAccessException {
-        Set<Class<?>> beanClassSet = ClassesHandler.getBeanClassSet();
-        addInnerBeanWithoutStatus(beanClassSet);
+        Set<Class<?>> beanClassSet = ClassesLoader.getBeanClassSet();
+        this.innerBeanLoader(beanClassSet);
         for (Class<?> cls : beanClassSet) {
             BEAN_MAP.put(cls, ReflectionUtil.newInstance(cls));
         }
-        ReflectionUtil.newInstance(ControllerMapping.class).init();
+        ReflectionUtil.newInstance(CustomBeanLoader.class).init();
+
     }
 }

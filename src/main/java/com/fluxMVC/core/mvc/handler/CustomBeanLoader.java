@@ -1,9 +1,7 @@
 package com.fluxMVC.core.mvc.handler;
 
 import com.fluxMVC.core.annotation.dataHandler.Bean;
-import com.fluxMVC.core.annotation.exception.ServerInnerException;
-import com.fluxMVC.core.initialize.ControllerMapping;
-import com.fluxMVC.core.initialize.IOCInitialize;
+import com.fluxMVC.core.initialize.MappingInitialize;
 import com.fluxMVC.core.util.ReflectionUtil;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -20,9 +18,9 @@ import java.util.Set;
  * @author Kaibo
  * @date 2018/5/30
  */
-public class CustomBeanHandler {
+public class CustomBeanLoader {
     public void init() throws InvocationTargetException, IllegalAccessException {
-        Set<Class<?>> configurationClassSet = ClassesHandler.getConfigurationClassSet();
+        Set<Class<?>> configurationClassSet = ClassesLoader.getConfigurationClassSet();
         for (Class<?> cls : configurationClassSet) {
             Method[] declaredMethods = cls.getDeclaredMethods();
             Object bean = ReflectionUtil.newInstance(cls);
@@ -45,7 +43,7 @@ public class CustomBeanHandler {
                 }
             }
         }
-        ReflectionUtil.newInstance(IOCInitialize.class).init();
+        ReflectionUtil.newInstance(MappingInitialize.class).init();
     }
 
     private void doSort(Method[] declaredMethods) {

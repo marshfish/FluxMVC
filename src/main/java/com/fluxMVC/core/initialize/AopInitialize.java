@@ -4,10 +4,9 @@ import com.fluxMVC.core.aop.proxy.Aspect;
 import com.fluxMVC.core.aop.proxy.AspectProxy;
 import com.fluxMVC.core.aop.proxy.Proxy;
 import com.fluxMVC.core.aop.transaction.Transaction;
-import com.fluxMVC.core.mvc.handler.ClassesHandler;
+import com.fluxMVC.core.mvc.handler.ClassesLoader;
 import com.fluxMVC.core.mvc.handler.BeanContainer;
 import com.fluxMVC.core.aop.proxy.ProxyManager;
-import com.fluxMVC.core.mvc.handler.CustomBeanHandler;
 import com.fluxMVC.core.util.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +42,7 @@ public final class AopInitialize {
         Set<Class<?>> targetClassSet = new HashSet<>();
         Class<? extends Annotation> annotation = aspect.value();
         if (!annotation.equals(Aspect.class)) {
-            targetClassSet.addAll(ClassesHandler.getClassSetByAnnotation(annotation));
+            targetClassSet.addAll(ClassesLoader.getClassSetByAnnotation(annotation));
         }
         return targetClassSet;
     }
@@ -98,7 +97,7 @@ public final class AopInitialize {
      */
     private static void addTransactionProxy(Map<Class<?>, Set<Class<?>>> proxyMap) {
         Set<Class<?>> serviceClassSet = new HashSet<>();
-        Set<Class<?>> classSet = ClassesHandler.getServiceClassSet();
+        Set<Class<?>> classSet = ClassesLoader.getServiceClassSet();
         for (Class<?> cls : classSet) {
             Method[] methods = cls.getMethods();
             for (Method method : methods) {
@@ -111,7 +110,7 @@ public final class AopInitialize {
     }
 
     private static void addAspectProxy(Map<Class<?>, Set<Class<?>>> proxyMap) throws Exception {
-        Set<Class<?>> proxyClassSet = ClassesHandler.getClassSetBySuper(AspectProxy.class);
+        Set<Class<?>> proxyClassSet = ClassesLoader.getClassSetBySuper(AspectProxy.class);
         for (Class<?> proxyClass : proxyClassSet) {
             if (proxyClass.isAnnotationPresent(Aspect.class)) {
                 Aspect aspect = proxyClass.getAnnotation(Aspect.class);
@@ -138,6 +137,7 @@ public final class AopInitialize {
             logger.error("aop help fail", e);
             e.printStackTrace();
         }
-        ReflectionUtil.newInstance(CustomBeanHandler.class).init();
+        ReflectionUtil.newInstance(IOCInitialize.class).init();
+
     }
 }

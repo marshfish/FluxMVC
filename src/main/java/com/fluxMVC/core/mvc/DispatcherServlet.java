@@ -5,10 +5,9 @@ import com.fluxMVC.core.annotation.annotationEnum.Exception;
 import com.fluxMVC.core.annotation.dataHandler.RequestMapping;
 import com.fluxMVC.core.annotation.exception.ArgsException;
 import com.fluxMVC.core.annotation.exception.PathException;
-import com.fluxMVC.core.annotation.exception.ServerInnerException;
 import com.fluxMVC.core.initialize.BeanInitialize;
 import com.fluxMVC.core.initialize.Config;
-import com.fluxMVC.core.initialize.ControllerMapping;
+import com.fluxMVC.core.initialize.MappingInitialize;
 import com.fluxMVC.core.mvc.bean.DataAndView;
 import com.fluxMVC.core.mvc.bean.EnvironmentContext;
 import com.fluxMVC.core.mvc.bean.Param;
@@ -24,6 +23,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
+import javax.servlet.SingleThreadModel;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -32,10 +32,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -113,12 +115,12 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     private List<Method> controllerAdapter(String basePath) throws PathException {
-        List<Class> controllerMapping = ControllerMapping.getControllerMapping(basePath);
+        List<Class> controllerMapping = MappingInitialize.getControllerMapping(basePath);
         return getMethodsMapping(controllerMapping);
     }
 
     private String getBasePath(String requestPath) {
-        Set<String> mappingSet = ControllerMapping.getControllerMapping();
+        Set<String> mappingSet = MappingInitialize.getControllerMapping();
         Iterator<String> iterator = mappingSet.iterator();
         String basePath = null;
         while (iterator.hasNext()) {
@@ -134,14 +136,14 @@ public class DispatcherServlet extends HttpServlet {
         if (controllerMapping == null || controllerMapping.size() == 0) {
             throw new PathException(Exception.MAPPING_NOT_FOUND.getInfo());
         }
-        List<Method> methodMapping = null;
+        List<Method> methodMapping = new ArrayList<>();
         //拥有controller mapping
         if (controllerMapping.size() == 1) {
-            methodMapping = ControllerMapping.getMethodMapping(controllerMapping.get(0));
+            methodMapping = MappingInitialize.getMethodMapping(controllerMapping.get(0));
         } else {
             //未设置controller mapping
             for (Class cls : controllerMapping) {
-                List<Method> singleMethodMapping = ControllerMapping.getMethodMapping(cls);
+                List<Method> singleMethodMapping = MappingInitialize.getMethodMapping(cls);
                 methodMapping.addAll(singleMethodMapping);
             }
         }
@@ -201,7 +203,7 @@ public class DispatcherServlet extends HttpServlet {
     }
 
 
-    public void viewResolve(HttpServletRequest request, HttpServletResponse response, Object result) throws IOException, ServletException {
+    private void viewResolve(HttpServletRequest request, HttpServletResponse response, Object result) throws IOException, ServletException {
         if (result instanceof DataAndView) {
             //返回ModelAndView
             DataAndView dataAndView = (DataAndView) result;
@@ -224,6 +226,7 @@ public class DispatcherServlet extends HttpServlet {
             print((String) result, response.getWriter());
         }
     }
+
 
     private void print(String json, PrintWriter writer) {
         writer.write(json);

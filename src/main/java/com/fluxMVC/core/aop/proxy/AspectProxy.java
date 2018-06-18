@@ -16,7 +16,7 @@ import java.lang.reflect.Method;
  */
 public abstract class AspectProxy implements Proxy {
     /**
-     * 代理接口实现
+     * 代理接口实现,责任链
      */
     private static final Logger logger = LoggerFactory.getLogger(AspectProxy.class);
 

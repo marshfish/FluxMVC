@@ -2,7 +2,7 @@ package com.fluxMVC.core.mvc.bean;
 
 import com.fluxMVC.core.annotation.annotationEnum.ResultData;
 import com.fluxMVC.core.annotation.dataHandler.ResponseBody;
-import com.fluxMVC.core.initialize.ControllerMapping;
+import com.fluxMVC.core.initialize.MappingInitialize;
 import com.fluxMVC.core.mvc.dataHandler.GsonMessgeConventer;
 import com.fluxMVC.core.mvc.handler.BeanContainer;
 import com.fluxMVC.core.util.JavaassistUtil;
@@ -53,7 +53,7 @@ public abstract class EnvironmentContext {
 
     private String[] getParametersByCache() {
         Map<String, String[]> flag;
-        if ((flag = ControllerMapping.PARAMTETER_CACHE.get(controllerClass)) != null) {
+        if ((flag = MappingInitialize.PARAMTETER_CACHE.get(controllerClass)) != null) {
             return flag.get(actionMethod.getName());
         }
         return JavaassistUtil.getParameterNames(controllerClass, actionMethod.getName());

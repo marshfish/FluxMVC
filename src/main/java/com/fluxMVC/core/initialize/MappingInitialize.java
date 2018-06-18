@@ -3,7 +3,7 @@ package com.fluxMVC.core.initialize;
 import com.fluxMVC.core.annotation.beanComponent.Controller;
 import com.fluxMVC.core.annotation.dataHandler.RequestMapping;
 import com.fluxMVC.core.annotation.exception.PathException;
-import com.fluxMVC.core.mvc.handler.ClassesHandler;
+import com.fluxMVC.core.mvc.handler.ClassesLoader;
 import com.fluxMVC.core.util.JavaassistUtil;
 import com.fluxMVC.core.util.ReflectionUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -25,7 +25,7 @@ import java.util.Set;
  * @version 1.0
  * @Ddate 2018/1/6
  */
-public final class ControllerMapping {
+public final class MappingInitialize {
     public static final Map<Class, List<Method>> METHOD_MAP = new HashMap<>();
     public static final Map<String, List<Class>> CONTROLLER_MAP = new HashMap<>();
     public static final Map<Class, Map<String, String[]>> PARAMTETER_CACHE = new HashMap<>();
@@ -44,7 +44,7 @@ public final class ControllerMapping {
     }
 
     public void init() throws InvocationTargetException, IllegalAccessException {
-        Set<Class<?>> classSet = ClassesHandler.getControllerClassSet();
+        Set<Class<?>> classSet = ClassesLoader.getControllerClassSet();
         if (CollectionUtils.isNotEmpty(classSet)) {
             for (Class<?> cls : classSet) {
                 Controller annotation = cls.getAnnotation(Controller.class);

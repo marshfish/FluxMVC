@@ -34,11 +34,11 @@ public class ParamProcessor extends EnvironmentContext {
     public void doProcess() {
         packageArgsType(parameters, parameterNames);
         for (int i = 0; i < parameters.length; i++) {
+            requestBodyProcessor(parameterNames[i], parameters[i]);
             requestParamProcessor(parameterNames[i], parameters[i]);
-            requestBodyProcessor(parameters[i]);
             pathVariableProcessor(parameterNames, parameters[i]);
         }
-        paramList = sortParameters().toArray();
+        super.paramList = sortParameters().toArray();
     }
 
 
@@ -135,24 +135,37 @@ public class ParamProcessor extends EnvironmentContext {
                 map.remove(value);
             }
         }
+        if (parameter.isAnnotationPresent(RequestBody.class)) {
+            RequestBody annotation = parameter.getAnnotation(RequestBody.class);
+            String indexName = annotation.value();
+            if (StringUtils.isNotEmpty(indexName) && !indexName.equals(parameterName)) {
+                Map<String, Object> map = param.getMap();
+                Object value = map.get(indexName);
+                map.put(parameterName, value);
+                map.remove(indexName);
+            }
+        }
     }
 
-    private void requestBodyProcessor(Parameter parameter) {
+    private void requestBodyProcessor(String parameterName, Parameter parameter) {
         if (parameter.isAnnotationPresent(RequestBody.class)) {
             Object obj;
             Map<String, Object> map = param.getMap();
             RequestBody annotation = parameter.getAnnotation(RequestBody.class);
             String paramName = annotation.value();
-            Class<?> type = parameter.getType();
+            if (StringUtils.isEmpty(paramName)) {
+                paramName = parameterName;
+            }
             if (map.containsKey(paramName)) {
                 String data = (String) map.get(paramName);
-                obj = BeanContainer.getBean(GsonMessgeConventer.class).read(data, null, type);
+                obj = BeanContainer.getBean(GsonMessgeConventer.class).read(data, null, parameter.getType());
                 if (obj != null) {
                     map.put(paramName, obj);
                 }
             }
         }
     }
+
 
     private void pathVariableProcessor(String[] parameterNames, Parameter parameter) {
         if (!controllerClass.getAnnotation(Controller.class).path().equals("") && parameter.isAnnotationPresent(PathVariable.class)) {

@@ -1,6 +1,6 @@
 package com.fluxMVC.core.initialize;
 
-import com.fluxMVC.core.mvc.handler.ClassesHandler;
+import com.fluxMVC.core.mvc.handler.ClassesLoader;
 import com.fluxMVC.core.util.ReflectionUtil;
 
 import java.lang.reflect.InvocationTargetException;
@@ -16,14 +16,14 @@ import java.lang.reflect.InvocationTargetException;
 public final class BeanInitialize {
     /**
      * 初始化
-     * ClassesHandler -> BeanContainer -> ControllerMapping -> AopInitialize -> CustomBeanHandler -> IOCInitialize
+     * ClassesLoader -> BeanContainer -> CustomBeanLoader -> MappingInitialize -> AopInitialize -> IOCInitialize
      */
-    private static boolean isInitialized;
+    private static boolean isInitialized = false;
 
     public static void init() throws InvocationTargetException, IllegalAccessException {
         if (!isInitialized) {
-            ReflectionUtil.newInstance(ClassesHandler.class).init();
             isInitialized = true;
+            ReflectionUtil.newInstance(ClassesLoader.class).init();
         }
     }
 }

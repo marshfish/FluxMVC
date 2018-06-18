@@ -24,7 +24,7 @@ import java.util.Set;
  * @version 1.0
  * @Ddate 2018/1/6
  */
-public final class ClassesHandler {
+public final class ClassesLoader {
     /**
      * 定义类集合(用于存放所加载的类)
      */
@@ -148,7 +148,5 @@ public final class ClassesHandler {
     public void init() throws InvocationTargetException, IllegalAccessException {
         CLASS_SET = ClassUtil.getClassSet(Config.getAppBasePackage());
         ReflectionUtil.newInstance(BeanContainer.class).init();
-
-
     }
 }
